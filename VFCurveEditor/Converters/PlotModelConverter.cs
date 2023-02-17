@@ -44,8 +44,8 @@ internal class PlotModelConverter : IValueConverter
             plotModel.Series.Add(target);
 
             // Axes are created automatically if they are not defined
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Voltage" });
-            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Frequency" });
+            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Bottom, Title = "Voltage, mV" });
+            plotModel.Axes.Add(new LinearAxis { Position = AxisPosition.Left, Title = "Frequency, MHz" });
 
             plotModel.PlotMargins = new OxyThickness(48, 0, -8, 36);
 

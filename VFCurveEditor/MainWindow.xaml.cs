@@ -46,15 +46,27 @@ public partial class MainWindow : Window
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        string gpuName = string.Empty;
+        string deviceId = string.Empty;
+
         using var searcher = new ManagementObjectSearcher("select * from Win32_VideoController");
         foreach (ManagementObject obj in searcher.Get().Cast<ManagementObject>())
         {
-            var name = obj["Name"];
-            var deviceID = obj["PNPDeviceID"];
+            gpuName = (string)obj["Name"];
+            deviceId = (string)obj["PNPDeviceID"];
         }
 
-        string path = @"C:\Program Files (x86)\MSI Afterburner\Profiles\VEN_10DE&DEV_2216&SUBSYS_88221043&REV_A1&BUS_8&DEV_0&FN_0.cfg";
-        OpenConfig(path);
+        deviceId = deviceId.Split("\\")[1];
+
+        var directory = new DirectoryInfo(DefaultMSIAfterburnerProfileFolder);
+        FileInfo configFile = directory.GetFiles($"{deviceId}*.cfg", SearchOption.TopDirectoryOnly)
+            .OrderByDescending(f => f.LastWriteTime)
+            .FirstOrDefault();
+
+        if (configFile != null)
+        {
+            OpenConfig(configFile.FullName);
+        }
     }
 
     private void OpenConfig(string path)

@@ -86,7 +86,7 @@
                 HorizontalContentAlignment="Right"
 			    Value="{Binding TargetVoltage, Mode=TwoWay}"
                 Margin="6,0,12,0"/>
-            <Label Content="Offset:" VerticalContentAlignment="Center" Grid.Column="7" Padding="0,3"/>
+            <Label Content="Voltage Offset:" VerticalContentAlignment="Center" Grid.Column="7" Padding="0,3"/>
             <cntrl:FloatUpDown
 			    Grid.Column="8"
 			    StepSize="1"
@@ -123,6 +123,11 @@
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Offset" Binding="{Binding Offset, NotifyOnSourceUpdated=True, UpdateSourceTrigger=LostFocus}">
+                    <DataGridTextColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="ToolTipService.ToolTip" Value="Frequency offset" />
+                        </Style>
+                    </DataGridTextColumn.HeaderStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="Binding.SourceUpdated" Handler="DataGridTextColumn_SourceUpdated" />

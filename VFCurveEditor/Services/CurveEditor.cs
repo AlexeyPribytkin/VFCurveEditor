@@ -59,12 +59,26 @@ internal class CurveEditor : ICurveEditor
             {
                 pointsDone++;
                 // Offset must be a multiple of 15
-                points[i].Offset = MathF.Ceiling((targetFrequency - startFreq) / pointsNumBetween * pointsDone / FrequencyMultiplicator) * FrequencyMultiplicator - (points[i].Frequency - startFreq);
+                if (points[i].Voltage != targetVoltage)
+                {
+                    points[i].Frequency += MathF.Ceiling((targetFrequency - startFreq) / pointsNumBetween * pointsDone / FrequencyMultiplicator) * FrequencyMultiplicator - (points[i].Frequency - startFreq);
+                }
             }
 
-            if (points[i].Voltage >= targetVoltage)
+            if (points[i].Voltage == targetVoltage)
             {
                 points[i].Offset = targetFrequency - points[i].Frequency;
+            }
+
+            if (points[i].Frequency > targetFrequency)
+            {
+                points[i].Offset = targetFrequency - points[i].Frequency;
+            }
+
+            if (points[i].Frequency < targetFrequency &&
+                points[i].Voltage > targetVoltage)
+            {
+                points[i].Frequency = targetFrequency;
             }
         }
 
