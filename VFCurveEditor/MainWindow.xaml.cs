@@ -91,13 +91,25 @@ public partial class MainWindow : Window
         Clipboard.SetText(_mainViewModel.TargetCurveString);
     }
 
-    private void Apply_Click(object sender, RoutedEventArgs e)
+    private void ApplyMethod1_Click(object sender, RoutedEventArgs e)
     {
+        Apply(0);
+    }
+
+    private void ApplyMethod2_Click(object sender, RoutedEventArgs e)
+    {
+        Apply(1);
+    }
+
+    private void Apply(int method)
+    {
+        var sourcePoints = _curveReader.Read(_mainViewModel.CurveString);
         _mainViewModel.CurvePoints = _curveEditor.Generate(
-            _mainViewModel.CurvePoints,
+            sourcePoints,
             _mainViewModel.TargetVoltage,
             _mainViewModel.TargetFrequency,
-            _mainViewModel.TargetOffset);
+            _mainViewModel.TargetOffset,
+            method);
 
         _mainViewModel.TargetCurveString = _curveReader.Write(_mainViewModel.CurvePoints);
     }

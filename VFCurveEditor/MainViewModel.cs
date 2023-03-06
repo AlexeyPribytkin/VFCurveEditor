@@ -76,8 +76,9 @@ internal class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
+        /// Default parameters
         TargetVoltage = 900f;
-        TargetFrequency = 1800f;
+        TargetFrequency = 1900f;
         TargetOffset = 50f;
     }
 

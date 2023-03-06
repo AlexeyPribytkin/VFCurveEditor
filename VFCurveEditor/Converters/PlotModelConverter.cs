@@ -14,8 +14,7 @@ internal class PlotModelConverter : IValueConverter
 
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        var curvePoints = value as IEnumerable<CurvePoint>;
-        if (curvePoints != null)
+        if (value is IEnumerable<CurvePoint> curvePoints)
         {
             return GetPlot(curvePoints);
         }

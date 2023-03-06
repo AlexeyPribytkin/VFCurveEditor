@@ -16,11 +16,6 @@ internal class CurveReader : ICurveReader
     private string _header;
     private string _ending;
 
-    public string Header => _header;
-
-    public string Ending => _ending;
-    //{ get; } = "030000000020DF440000A6420020DF440000A6420020DF440000AC420020DF440000AC420000B4440000B4420000B4440000B44200000000000000000000000000000000";
-
     public CurveReader()
     {
         Reset();
@@ -39,9 +34,11 @@ internal class CurveReader : ICurveReader
         CurvePoint point;
         while ((point = ReadPoint()) != null)
         {
-            if (point.Frequency == 0 && point.Voltage == 0 && point.Offset == 0)
+            if (point.Frequency == 0 &&
+                point.Voltage == 0 &&
+                point.Offset == 0)
             {
-                _ending = _curveString.Substring(_position - 3 * Int32Length);
+                _ending = _curveString[(_position - 3 * Int32Length)..];
                 _position = _curveString.Length;
                 break;
             }

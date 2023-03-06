@@ -8,9 +8,7 @@ namespace VFCurveEditor.Services;
 
 internal class CurveEditor : ICurveEditor
 {
-    // Options
-    public float FrequencyMultiplicator = 15;
-    public bool IsOffset = true;
+    private const float FREQUENCY_MULTIPLIER = 15;
 
     /// <summary>
     /// Generates a new curve by given parameters.
@@ -23,65 +21,65 @@ internal class CurveEditor : ICurveEditor
     /// targetFrequency = 1935;
     /// offsetVoltage = 50;
     /// </example>
-    public IEnumerable<CurvePoint> Generate(IEnumerable<CurvePoint> curvePoints, float targetVoltage, float targetFrequency, float offsetVoltage)
+    public IEnumerable<CurvePoint> Generate(IEnumerable<CurvePoint> curvePoints, float targetVoltage, float targetFrequency, float offsetVoltage, int method = 0)
     {
-        if (!curvePoints.Any()) return curvePoints;
+        if (!curvePoints.Any()) return Array.Empty<CurvePoint>();
 
-        CurvePoint[] points = curvePoints
-            .Select(p => new CurvePoint
-            {
-                Offset = 0f,
-                Frequency = p.Frequency,
-                Voltage = p.Voltage
-            })
-            .ToArray();
+        CurvePoint[] points = curvePoints.ToArray();
 
-        var minVoltage = points.Select(_ => _.Voltage).Min();
-        var maxVoltage = points.Select(_ => _.Voltage).Max();
+        CurvePoint startSlopePoint = points.First(_ => _.Voltage >= targetVoltage - offsetVoltage);
+        CurvePoint endSlopePoint = points.First(_ => _.Voltage >= targetVoltage);
 
-        int pointsNumBetween = 0;
-        for (int i = 0; i < points.Length; i++)
+        int startSlopeIndex = Array.IndexOf(points, startSlopePoint);
+        int endSlopeIndex = Array.IndexOf(points, endSlopePoint);
+
+        float inclineDelta = (targetFrequency - startSlopePoint.Frequency) / (endSlopeIndex - startSlopeIndex);
+
+        switch (method)
         {
-            if (points[i].Voltage > targetVoltage - offsetVoltage &&
-                points[i].Voltage <= targetVoltage)
-            {
-                pointsNumBetween++;
-            }
-        }
-
-        float startFreq = points.First(_ => _.Voltage >= targetVoltage - offsetVoltage).Frequency;
-
-        int pointsDone = 0;
-        for (int i = 0; i < points.Length; i++)
-        {
-            if (points[i].Frequency > startFreq &&
-                pointsDone < pointsNumBetween)
-            {
-                pointsDone++;
-                // Offset must be a multiple of 15
-                if (points[i].Voltage != targetVoltage)
+            case 0:
+                // Slope calculation to a target point
+                for (int i = startSlopeIndex; i < endSlopeIndex; i++)
                 {
-                    points[i].Frequency += MathF.Ceiling((targetFrequency - startFreq) / pointsNumBetween * pointsDone / FrequencyMultiplicator) * FrequencyMultiplicator - (points[i].Frequency - startFreq);
+                    float frequency = points[i].Frequency;
+                    float offset = MathF.Ceiling(inclineDelta * (i - startSlopeIndex) / FREQUENCY_MULTIPLIER) * FREQUENCY_MULTIPLIER - (frequency - startSlopePoint.Frequency);
+                    points[i].Frequency += offset;
                 }
-            }
 
-            if (points[i].Voltage == targetVoltage)
-            {
-                points[i].Offset = targetFrequency - points[i].Frequency;
-            }
+                // Offset for a target point
+                points[endSlopeIndex].Offset = targetFrequency - points[endSlopeIndex].Frequency;
 
-            if (points[i].Frequency > targetFrequency)
-            {
-                points[i].Offset = targetFrequency - points[i].Frequency;
-            }
+                // Form target frequency rack for the rest of the points
+                for (int i = endSlopeIndex + 1; i < points.Length; i++)
+                {
+                    if (points[i].Frequency < targetFrequency)
+                    {
+                        points[i].Frequency = targetFrequency;
+                    }
+                    else
+                    {
+                        points[i].Offset = targetFrequency - points[i].Frequency;
+                    }
+                }
+                break;
+            // Offset based method
+            case 1:
+                // Slope calculation to a target point
+                for (int i = startSlopeIndex; i < endSlopeIndex; i++)
+                {
+                    float frequency = points[i].Frequency;
+                    float offset = MathF.Ceiling(inclineDelta * (i - startSlopeIndex) / FREQUENCY_MULTIPLIER) * FREQUENCY_MULTIPLIER - (frequency - startSlopePoint.Frequency);
+                    points[i].Offset = offset;
+                }
 
-            if (points[i].Frequency < targetFrequency &&
-                points[i].Voltage > targetVoltage)
-            {
-                points[i].Frequency = targetFrequency;
-            }
+                // Form target frequency rack for the rest of the points
+                for (int i = endSlopeIndex; i < points.Length; i++)
+                {
+                    points[i].Offset = targetFrequency - points[i].Frequency;
+                }
+                break;
+            default: break;
         }
-
         return points;
     }
 }

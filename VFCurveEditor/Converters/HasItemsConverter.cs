@@ -8,8 +8,7 @@ internal class HasItemsConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
     {
-        var collection = value as IEnumerable;
-        if (collection != null)
+        if (value is IEnumerable collection)
         {
             return collection.GetEnumerator().MoveNext();
         }

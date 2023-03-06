@@ -14,11 +14,10 @@ internal class ProfileReader : IProfileReader
 
     public IEnumerable<Profile> Read(string path)
     {
-        string[] lines = File.ReadAllLines(path);
-
         _path = path;
         _profiles.Clear();
 
+        string[] lines = File.ReadAllLines(path);
         foreach (string line in lines)
         {
             if (line.StartsWith('[') && line.EndsWith(']'))

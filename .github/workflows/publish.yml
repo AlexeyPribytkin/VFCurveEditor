@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        
+    - name: Restore Dependencies
+      run: dotnet restore VFCurveEditor
+      
+    - name: Build
+      run: dotnet publish VFCurveEditor -p:PublishProfile=ToFile -p:DebugType=None -p:DebugSymbols=false
+      
+    - name: Zip
+      uses: vimtor/action-zip@v1
+      with:
+        files: "publish"
+        dest: VFCurveEditor-$${{ github.ref_name }}-Windows-x64.zip
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+          
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: VFCurveEditor-$${{ github.ref_name }}-Windows-x64.zip
+        asset_name: VFCurveEditor-$${{ github.ref_name }}-Windows-x64.zip
+        asset_content_type: application/zip

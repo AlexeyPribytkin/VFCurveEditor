@@ -16,5 +16,5 @@ internal interface ICurveEditor
     /// targetFrequency = 1935;
     /// offsetVoltage = 50;
     /// </example>
-    IEnumerable<CurvePoint> Generate(IEnumerable<CurvePoint> points, float targetVoltage, float targetFrequency, float offsetVoltage);
+    IEnumerable<CurvePoint> Generate(IEnumerable<CurvePoint> points, float targetVoltage, float targetFrequency, float offsetVoltage, int method = 0);
 }
