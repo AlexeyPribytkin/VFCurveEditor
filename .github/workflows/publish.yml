@@ -21,13 +21,7 @@ jobs:
     - name: Build
       run: dotnet publish VFCurveEditor -p:PublishProfile=ToFile -p:DebugType=None -p:DebugSymbols=false
 
-    - name: Zip
-      uses: vimtor/action-zip@v1
-      with:
-        files: "publish"
-        dest: VFCurveEditor-${{ github.ref_name }}-Windows-x64.zip
-
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        files: VFCurveEditor-${{ github.ref_name }}-Windows-x64.zip
+        files: publish/VFCurveEditor.exe
