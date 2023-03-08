@@ -3,8 +3,10 @@ using VFCurveEditor.Models;
 
 namespace VFCurveEditor.Interfaces;
 
-internal interface ICurveEditor
+internal interface IMethod
 {
+    string Name { get; }
+
     /// <summary>
     /// Generates a new curve by given parameters.
     /// </summary>
@@ -16,5 +18,5 @@ internal interface ICurveEditor
     /// targetFrequency = 1935;
     /// offsetVoltage = 50;
     /// </example>
-    IEnumerable<CurvePoint> Generate(IEnumerable<CurvePoint> points, float targetVoltage, float targetFrequency, float offsetVoltage, int method = 0);
+    IEnumerable<CurvePoint> Apply(IEnumerable<CurvePoint> points, float targetVoltage, float targetFrequency, float offsetVoltage);
 }

@@ -19,11 +19,9 @@ namespace VFCurveEditor;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private const string DefaultMSIAfterburnerProfileFolder = "C:\\Program Files (x86)\\MSI Afterburner\\Profiles\\";
-
     private readonly ICurveReader _curveReader;
-    private readonly ICurveEditor _curveEditor;
     private readonly IProfileReader _profileReader;
+    private readonly IEnumerable<IMethod> _methods;
 
     private readonly MainViewModel _mainViewModel;
 
@@ -31,15 +29,18 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        CultureInfo ci = new CultureInfo("en-US");
+        CultureInfo ci = new("en-US");
         Thread.CurrentThread.CurrentCulture = ci;
         Thread.CurrentThread.CurrentUICulture = ci;
 
         _curveReader = new CurveReader();
-        _curveEditor = new CurveEditor();
         _profileReader = new ProfileReader();
+        _methods = ServiceProviderHelper.GetInstances<IMethod>();
 
-        _mainViewModel = new MainViewModel();
+        _mainViewModel = new MainViewModel
+        {
+            Methods = _methods
+        };
 
         DataContext = _mainViewModel;
     }
@@ -58,7 +59,7 @@ public partial class MainWindow : Window
 
         deviceId = deviceId.Split("\\")[1];
 
-        var directory = new DirectoryInfo(DefaultMSIAfterburnerProfileFolder);
+        var directory = new DirectoryInfo(Settings.DEFAULT_PROFILE_FOLDER);
         FileInfo configFile = directory.GetFiles($"{deviceId}*.cfg", SearchOption.TopDirectoryOnly)
             .OrderByDescending(f => f.LastWriteTime)
             .FirstOrDefault();
@@ -91,40 +92,18 @@ public partial class MainWindow : Window
         Clipboard.SetText(_mainViewModel.TargetCurveString);
     }
 
-    private void ApplyMethod1_Click(object sender, RoutedEventArgs e)
-    {
-        Apply(0);
-    }
-
-    private void ApplyMethod2_Click(object sender, RoutedEventArgs e)
-    {
-        Apply(1);
-    }
-
-    private void Apply(int method)
-    {
-        var sourcePoints = _curveReader.Read(_mainViewModel.CurveString);
-        _mainViewModel.CurvePoints = _curveEditor.Generate(
-            sourcePoints,
-            _mainViewModel.TargetVoltage,
-            _mainViewModel.TargetFrequency,
-            _mainViewModel.TargetOffset,
-            method);
-
-        _mainViewModel.TargetCurveString = _curveReader.Write(_mainViewModel.CurvePoints);
-    }
-
     private void Reset_Click(object sender, RoutedEventArgs e)
     {
         _mainViewModel.CurvePoints = _curveReader.Read(_mainViewModel.CurveString);
         _mainViewModel.TargetCurveString = _curveReader.Write(_mainViewModel.CurvePoints);
+        _mainViewModel.SelectedMethod = null;
     }
 
     private void SelectConfig_Click(object sender, RoutedEventArgs e)
     {
-        string initialDirectory = Directory.Exists(DefaultMSIAfterburnerProfileFolder)
-            ? DefaultMSIAfterburnerProfileFolder
-            : "shell:MyComputerFolder";
+        string initialDirectory = Directory.Exists(Settings.DEFAULT_PROFILE_FOLDER)
+            ? Settings.DEFAULT_PROFILE_FOLDER
+            : Settings.MYCOMPUTER_FOLDER;
 
         Microsoft.Win32.OpenFileDialog dlg = new()
         {
@@ -144,7 +123,7 @@ public partial class MainWindow : Window
     {
         if (!string.IsNullOrEmpty(_mainViewModel.Path))
         {
-            Process.Start("explorer.exe", _mainViewModel.Path);
+            Process.Start(Settings.EXPLORER, _mainViewModel.Path);
         }
     }
 
@@ -161,6 +140,14 @@ public partial class MainWindow : Window
         RefreshTargetCurveString();
     }
 
+    private void Properties_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if(_mainViewModel.SelectedMethod != null)
+        {
+            Apply(_mainViewModel.SelectedMethod);
+        }
+    }
+
     private void DataGridTextColumn_SourceUpdated(object sender, EventArgs e)
     {
         _mainViewModel.RefreshGraph();
@@ -173,5 +160,17 @@ public partial class MainWindow : Window
         var points = _mainViewModel.CurvePoints;
         var outputCurve = _curveReader.Write(points);
         _mainViewModel.TargetCurveString = outputCurve;
+    }
+
+    private void Apply(IMethod method)
+    {
+        var sourcePoints = _curveReader.Read(_mainViewModel.CurveString);
+        _mainViewModel.CurvePoints = method.Apply(
+            sourcePoints,
+            _mainViewModel.TargetVoltage,
+            _mainViewModel.TargetFrequency,
+            _mainViewModel.TargetOffset);
+
+        _mainViewModel.TargetCurveString = _curveReader.Write(_mainViewModel.CurvePoints);
     }
 }

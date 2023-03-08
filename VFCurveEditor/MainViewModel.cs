@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.VisualBasic;
+using VFCurveEditor.Interfaces;
 using VFCurveEditor.Models;
 
 namespace VFCurveEditor;
@@ -74,12 +76,34 @@ internal class MainViewModel : INotifyPropertyChanged
         set => SetField(ref _selectedProfile, value);
     }
 
+    private IEnumerable<IMethod> _methods;
+    public IEnumerable<IMethod> Methods
+    {
+        get => _methods;
+        set => SetField(ref _methods, value);
+    }
+
+    private IMethod _selectedMethod;
+    public IMethod SelectedMethod
+    {
+        get => _selectedMethod;
+        set => SetField(ref _selectedMethod, value);
+    }
+
+    public IEnumerable<float> Frequencies { get; }
+    public IEnumerable<float> Voltages { get; }
+    public IEnumerable<float> Offsets { get; }
+
     public MainViewModel()
     {
         /// Default parameters
         TargetVoltage = 900f;
-        TargetFrequency = 1900f;
+        TargetFrequency = 1800f;
         TargetOffset = 50f;
+
+        Frequencies = Range(Settings.MIN_FREQUENCY, Settings.MAX_FREQUENCY, Settings.FREQUENCY_STEP);
+        Voltages = Range(Settings.MIN_VOLTAGE, Settings.MAX_VOLTAGE, Settings.VOLTAGE_STEP);
+        Offsets = Range(Settings.MIN_VOLTAGE, Settings.MAX_VOLTAGE, Settings.VOLTAGE_STEP);
     }
 
     public void Reset()
@@ -97,6 +121,19 @@ internal class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CurvePoints));
     }
 
+    #region Helpers
+    private static IEnumerable<float> Range(float min, float max, float step)
+    {
+        float value = min;
+
+        for (int i = 0; value < max; i++)
+        {
+            value = min + step * i;
+            yield return value;
+        }
+    }
+    #endregion
+
     #region NotifyPropertyChanged
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -109,5 +146,5 @@ internal class MainViewModel : INotifyPropertyChanged
         OnPropertyChanged(propertyName);
         return true;
     }
-    #endregion NotifyPropertyChanged
+    #endregion
 }

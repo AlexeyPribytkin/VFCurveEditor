@@ -4,8 +4,6 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:VFCurveEditor"
-        xmlns:cntrl="clr-namespace:NumericUpDownLib;assembly=NumericUpDownLib"
         xmlns:c="clr-namespace:VFCurveEditor.Converters"
         mc:Ignorable="d"
         Title="VF Curve Editor"
@@ -52,13 +50,13 @@
                 <ColumnDefinition Width="Auto" MinWidth="96"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" MinWidth="84"/>
+                <ColumnDefinition Width="Auto" MinWidth="90"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" MinWidth="84"/>
+                <ColumnDefinition Width="Auto" MinWidth="90"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto" MinWidth="84"/>
+                <ColumnDefinition Width="Auto" MinWidth="90"/>
                 <ColumnDefinition Width="Auto" MinWidth="52"/>
-                <ColumnDefinition Width="Auto" MinWidth="52"/>
+                <ColumnDefinition Width="Auto" MinWidth="164"/>
                 <ColumnDefinition Width="Auto" MinWidth="52"/>
             </Grid.ColumnDefinitions>
             <Label Content="Profiles:" VerticalContentAlignment="Center" Grid.Column="0" Padding="0,3"/>
@@ -69,36 +67,35 @@
                       Grid.Column="1"
                       Margin="6,0" />
             <Label Content="Frequency:" VerticalContentAlignment="Center" Grid.Column="3" Padding="0,3"/>
-            <cntrl:FloatUpDown
-			    Grid.Column="4"
-			    StepSize="15"
-                FormatString="0"
-                MinValue="0"
-                HorizontalContentAlignment="Right"
-			    Value="{Binding TargetFrequency, Mode=TwoWay}"
-                Margin="6,0,12,0"/>
+            <ComboBox ItemsSource="{Binding Frequencies}"
+                      SelectedItem="{Binding TargetFrequency, Mode=TwoWay}"
+                      SelectionChanged="Properties_SelectionChanged"
+                      VerticalContentAlignment="Center"
+                      Grid.Column="4"
+                      Margin="6,0,12,0"/>
             <Label Content="Voltage:" VerticalContentAlignment="Center" Grid.Column="5" Padding="0,3"/>
-            <cntrl:FloatUpDown
-			    Grid.Column="6"
-			    StepSize="6.25"
-                FormatString="0.00"
-                MinValue="0"
-                MaxValue="3000"
-                HorizontalContentAlignment="Right"
-			    Value="{Binding TargetVoltage, Mode=TwoWay}"
-                Margin="6,0,12,0"/>
+            <ComboBox ItemsSource="{Binding Voltages}"
+                      SelectedItem="{Binding TargetVoltage, Mode=TwoWay}"
+                      SelectionChanged="Properties_SelectionChanged"
+                      VerticalContentAlignment="Center"
+                      Grid.Column="6"
+                      Margin="6,0,12,0"/>
             <Label Content="Voltage Offset:" VerticalContentAlignment="Center" Grid.Column="7" Padding="0,3"/>
-            <cntrl:FloatUpDown
-			    Grid.Column="8"
-			    StepSize="1"
-                FormatString="0"
-                MinValue="0"
-                MaxValue="1000"
-                HorizontalContentAlignment="Right"
-			    Value="{Binding TargetOffset, Mode=TwoWay}"
-                Margin="6,0,12,0"/>
-            <Button Content="Method 1" Padding="6,3" Grid.Column="9" Margin="0,0,6,0" Click="ApplyMethod1_Click"/>
-            <Button Content="Method 2" Padding="6,3" Grid.Column="10" Margin="6,0,6,0" Click="ApplyMethod2_Click"/>
+            <ComboBox ItemsSource="{Binding Offsets}"
+                      SelectedItem="{Binding TargetOffset, Mode=TwoWay}"
+                      SelectionChanged="Properties_SelectionChanged"
+                      VerticalContentAlignment="Center"
+                      Grid.Column="8"
+                      Margin="6,0,12,0"/>
+
+            <Label Content="Method:" VerticalContentAlignment="Center" Grid.Column="9" Padding="0,3"/>
+            <ComboBox ItemsSource="{Binding Methods}"
+                      SelectedItem="{Binding SelectedMethod}"
+                      SelectionChanged="Properties_SelectionChanged"
+                      VerticalContentAlignment="Center"
+                      DisplayMemberPath="Name"
+                      Grid.Column="10"/>
+
             <Button Content="Reset" Padding="6,3" Grid.Column="11" Margin="6,0,0,0" Click="Reset_Click"/>
         </Grid>
         <oxy:PlotView Model="{Binding CurvePoints, Converter={StaticResource PlotModelConverter}}" Margin="12,6,6,6" Grid.Row="2" Grid.Column="0"
